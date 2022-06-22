@@ -193,7 +193,7 @@ bot.on('message', msg => {
                                                                         .then((linkObject) => {
                                                                             bot.sendMessage(
                                                                                 msg.chat.id,
-                                                                                `Приходите в наш прекрасный чат, не стесняйтесь задавать вопросы кураторам ❤️  <a href="${linkObject.invite_link}">Все пиздюки тут</a>`,
+                                                                                'Приходите в наш прекрасный чат, не стесняйтесь задавать вопросы кураторам ❤️  <a href="' + linkObject.invite_link + '">Все пиздюки тут</a>',
                                                                                 {parse_mode: 'HTML'}
                                                                             )
                                                                         })
@@ -255,3 +255,13 @@ const job = schedule.scheduleJob('00 00 00 * * *', function(){
         connection.query(`DELETE FROM wp_active_user_courses WHERE end_date < 1658259195000`)
     })
 });
+
+
+
+
+
+
+
+// Enable graceful stop
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
