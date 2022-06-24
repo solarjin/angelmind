@@ -260,7 +260,8 @@ const job = schedule.scheduleJob('00 00 00 * * *', function(){
 
 
 
-
+bot.setWebhook(process.env.BASE_URL)
+bot.startWebhook('/webhook', null, process.env.PORT)
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
