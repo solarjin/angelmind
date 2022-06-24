@@ -159,7 +159,7 @@ bot.on('message', msg => {
                                                                         .then((linkObject) => {
                                                                             bot.sendMessage(
                                                                                 msg.chat.id,
-                                                                                `Держите ссылку на закрытый канал Мастерская души, добро пожаловать 🤗 <a href="${linkObject.invite_link}">Сюда жми</a>`,
+                                                                                `Держите ссылку на закрытый канал Мастерская души, добро пожаловать 🤗 <a href="${linkObject.invite_link}">Перейти</a>`,
                                                                                 {parse_mode: 'HTML'}
                                                                             )
                                                                         })
@@ -250,7 +250,3 @@ const job = schedule.scheduleJob('00 00 00 * * *', function(){
 
 
 
-
-// Enable graceful stop
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
