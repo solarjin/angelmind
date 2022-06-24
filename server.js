@@ -1,6 +1,6 @@
 require('dotenv').config()
 const TelegramBot = require('node-telegram-bot-api');
-const bot = new TelegramBot(process.env.BOT_TOKEN, {polling: true, webHook: {port: process.env.PORT || 8443, host: process.env.HOST}});
+const bot = new TelegramBot(process.env.BOT_TOKEN, {polling: true});
 const schedule = require('node-schedule');
 const Promise = require('bluebird');
 Promise.config({
