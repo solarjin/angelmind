@@ -22,12 +22,12 @@ function handleDisconnect() {
     connection = mysql.createConnection(db_config);
     connection.connect(function(err) {
         if(err) {
-            console.log('error when connecting to db:', err);
+            // console.log('error when connecting to db:', err);
             setTimeout(handleDisconnect, 2000);
         }
     });
     connection.on('error', function(err) {
-        console.log('db error', err);
+        // console.log('db error', err);
         if(err.code === 'PROTOCOL_CONNECTION_LOST') {
             handleDisconnect();
         } else {
@@ -185,7 +185,7 @@ bot.on('message', msg => {
                                                                         .then((linkObject) => {
                                                                             bot.sendMessage(
                                                                                 msg.chat.id,
-                                                                                'Приходите в наш прекрасный чат, не стесняйтесь задавать вопросы кураторам ❤️  <a href="' + linkObject.invite_link + '">Все пиздюки тут</a>',
+                                                                                'Приходите в наш прекрасный чат, не стесняйтесь задавать вопросы кураторам ❤️  <a href="' + linkObject.invite_link + '">Перейти</a>',
                                                                                 {parse_mode: 'HTML'}
                                                                             )
                                                                         })
@@ -233,7 +233,7 @@ const job = schedule.scheduleJob('00 00 00 * * *', function(){
 
         res.forEach((user) => {
 
-            console.log( +user.tg_chat_id, user.tg_id)
+            console.log( +user.tg_chat_id, user.tg_id, 'Deleted')
 
             bot.banChatMember(+user.tg_chat_id, user.tg_id )
                 .then(kicked => {
