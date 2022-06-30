@@ -228,7 +228,6 @@ bot.on('message', msg => {
 
 
 
-
 const job = schedule.scheduleJob('00 00 00 * * *', function(){
 
     connection.query(`SELECT * FROM wp_active_user_courses WHERE end_date > ${Date.now()}`, (err, res) => {
@@ -236,7 +235,7 @@ const job = schedule.scheduleJob('00 00 00 * * *', function(){
 
         res.forEach((user) => {
 
-            console.log( +user.tg_chat_id, user.tg_id, 'Deleted')
+            console.log( +user.tg_chat_id, user.tg_id, user.end_date, 'Deleted')
 
             bot.banChatMember(+user.tg_chat_id, user.tg_id )
                 .then(kicked => {
