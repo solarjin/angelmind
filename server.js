@@ -230,7 +230,7 @@ bot.on('message', msg => {
 
 const job = schedule.scheduleJob('00 00 00 * * *', function(){
 
-    connection.query(`SELECT * FROM wp_active_user_courses WHERE end_date > ${Date.now()}`, (err, res) => {
+    connection.query(`SELECT * FROM wp_active_user_courses WHERE end_date < ${Date.now()}`, (err, res) => {
         console.log( res )
 
         res.forEach((user) => {
