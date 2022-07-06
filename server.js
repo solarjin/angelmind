@@ -9,6 +9,10 @@ Promise.config({
 const mysql = require('mysql');
 
 
+
+
+
+
 var db_config = {
     host     : process.env.DB_HOST,
     database : process.env.DB_NAME,
@@ -43,8 +47,6 @@ handleDisconnect();
 
 bot.on('message', msg => {
 
-    // console.log( msg )
-
     if ( msg.text === '/start' ) {
         bot.sendMessage(msg.chat.id, 'Здравствуйте, я бот-админ Angel Mind 🥳\n\nНапишите пожалуйста свой nickname, вы получили его на сайте angelmind.ru при покупке курса «Мастерская души»\nИ я вас добавлю в канал 😇')
     } else if ( msg.chat.id.toString() !== process.env.TG_CHANNEL_ID && msg.chat.id.toString() !== process.env.TG_GROUP_ID ) {
@@ -60,13 +62,16 @@ bot.on('message', msg => {
 
 
                     // обогащаем данные пользователя на id и имя телеги пусть будет
-                    connection.query(`UPDATE wp_users SET telegram_id = ${msg.from.id}, telegram_username='${msg.from.username}', telegram_name='${msg.from.first_name}' WHERE id = ${wpUsers[0].ID}`);
+                    connection.query(`UPDATE wp_users SET telegram_id = ${msg.from.id}, telegram_username='${msg.from.username}', telegram_name='${msg.from.first_name}' WHERE id = ${wpUsers[0].ID}`, err => {
+                        if (err) { console.log( err ) }
+                    });
 
                     // Ищем куплен ли курс у пользователя
                     connection.query(`
                         SELECT
                             p.ID AS 'order_id',
-                            p.post_date AS 'purchase_date',
+                            p.po
+                            st_date AS 'purchase_date',
                             MAX( CASE WHEN pm.meta_key = '_customer_user'       AND p.ID = pm.post_id THEN pm.meta_value END ) AS 'user_id',
                             ( select group_concat( order_item_name ) FROM wp_woocommerce_order_items where order_id = p.ID AND order_item_name LIKE '%Мастерская души%' ) AS 'Items Ordered',
                             ( select group_concat(order_item_id ) FROM wp_woocommerce_order_items where order_id = p.ID AND order_item_name LIKE '%Мастерская души%' ) AS 'item_id'
@@ -108,7 +113,7 @@ bot.on('message', msg => {
                                             FROM wp_woocommerce_order_itemmeta 
                                             WHERE order_item_id = ${lastOrder['item_id']} AND meta_key = '_course_id'
                                         ) AND meta_key = '_lp_duration'
-                                        `, function (error, duration) {
+                                        `, function (err, duration) {
                                             if (err) {
                                                 console.log(err);
                                             } else {
@@ -157,7 +162,9 @@ bot.on('message', msg => {
                                                         connection.query(`SELECT * FROM wp_active_user_courses WHERE user_id = ${ wpUsers[0].ID } AND tg_id = ${ msg.from.id } AND tg_chat_id = '${ process.env.TG_CHANNEL_ID }' AND end_date = '${courseEndDate}'`, function(err, res){
                                                             if ( err ) { console.log( err ) } else {
                                                                 if ( !res.length ) {
-                                                                    connection.query(`INSERT wp_active_user_courses SET user_id = '${ wpUsers[0].ID }', tg_id = ${ msg.from.id }, tg_chat_id = '${ process.env.TG_CHANNEL_ID }', end_date = '${courseEndDate}'`)
+                                                                    connection.query(`INSERT wp_active_user_courses SET user_id = '${ wpUsers[0].ID }', tg_id = ${ msg.from.id }, tg_chat_id = '${ process.env.TG_CHANNEL_ID }', end_date = '${courseEndDate}'`, err => {
+                                                                        console.log( err )
+                                                                    })
                                                                     bot.createChatInviteLink(process.env.TG_CHANNEL_ID)
                                                                         .then((linkObject) => {
                                                                             bot.sendMessage(
@@ -183,7 +190,9 @@ bot.on('message', msg => {
                                                         connection.query(`SELECT * FROM wp_active_user_courses WHERE user_id = ${ wpUsers[0].ID } AND tg_id = ${ msg.from.id } AND tg_chat_id = '${ process.env.TG_GROUP_ID }' AND end_date = '${courseEndDate}'`, function(err, res){
                                                             if ( err ) { console.log( err ) } else {
                                                                 if ( !res.length ) {
-                                                                    connection.query(`INSERT wp_active_user_courses SET user_id = '${ wpUsers[0].ID }', tg_id = ${ msg.from.id }, tg_chat_id = '${ process.env.TG_GROUP_ID }', end_date = '${courseEndDate}'`)
+                                                                    connection.query(`INSERT wp_active_user_courses SET user_id = '${ wpUsers[0].ID }', tg_id = ${ msg.from.id }, tg_chat_id = '${ process.env.TG_GROUP_ID }', end_date = '${courseEndDate}'`, err => {
+                                                                        console.log( err )
+                                                                    })
                                                                     bot.createChatInviteLink(process.env.TG_GROUP_ID)
                                                                         .then((linkObject) => {
                                                                             bot.sendMessage(
@@ -231,22 +240,30 @@ bot.on('message', msg => {
 const job = schedule.scheduleJob('00 00 00 * * *', function(){
 
     connection.query(`SELECT * FROM wp_active_user_courses WHERE end_date < ${Date.now()}`, (err, res) => {
-        console.log( res )
+        if ( err ) {
+            console.log( err )
+        } else {
+            console.log( res )
 
-        res.forEach((user) => {
+            res.forEach((user) => {
 
-            console.log( +user.tg_chat_id, user.tg_id, user.end_date, 'Deleted')
+                console.log( +user.tg_chat_id, user.tg_id, user.end_date, 'Deleted')
 
-            bot.banChatMember(+user.tg_chat_id, user.tg_id )
-                .then(kicked => {
-                    if ( kicked ) {
-                        bot.unbanChatMember(+user.tg_chat_id, user.tg_id )
+                bot.banChatMember(+user.tg_chat_id, user.tg_id )
+                    .then(kicked => {
+                        if ( kicked ) {
+                            bot.unbanChatMember(+user.tg_chat_id, user.tg_id )
+                        }
+                    })
+
+
+                connection.query(`DELETE FROM wp_active_user_courses WHERE end_date < ${Date.now()}`, (err) => {
+                    if (err) {
+                        console.log( err )
                     }
                 })
-        })
-
-
-        connection.query(`DELETE FROM wp_active_user_courses WHERE end_date < 1658259195000`)
+            })
+        }
     })
 });
 
