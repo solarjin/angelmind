@@ -46,6 +46,7 @@ handleDisconnect();
 
 
 bot.on('message', msg => {
+    console.log(msg.from.id, msg.from.username, msg.text);
 
     if ( msg.text === '/start' ) {
         bot.sendMessage(msg.chat.id, 'Здравствуйте, я бот-админ Angel Mind 🥳\n\nНапишите пожалуйста свой nickname, вы получили его на сайте angelmind.ru при покупке курса «Мастерская души»\nИ я вас добавлю в канал 😇')
