@@ -47,13 +47,11 @@ handleDisconnect();
 
 bot.on('message', msg => {
 
-    if ( msg.chat.id !== process.env.TG_CHANNEL_ID && msg.chat.id !== process.env.TG_GROUP_ID ) {
-        console.log(msg.from.id, msg.from.username, msg.text);
-    }
-
     if ( msg.text === '/start' ) {
         bot.sendMessage(msg.chat.id, 'Здравствуйте, я бот-админ Angel Mind 🥳\n\nНапишите пожалуйста свой nickname, вы получили его на сайте angelmind.ru при покупке курса «Мастерская души»\nИ я вас добавлю в канал 😇')
     } else if ( msg.chat.id.toString() !== process.env.TG_CHANNEL_ID && msg.chat.id.toString() !== process.env.TG_GROUP_ID ) {
+
+        console.log(msg.from.id, msg.from.username, msg.text);
 
         connection.query(`SELECT * FROM wp_users WHERE user_nicename = '${msg.text}'`, function (err, wpUsers) {
             if (err) {
