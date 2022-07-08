@@ -46,7 +46,10 @@ handleDisconnect();
 
 
 bot.on('message', msg => {
-    console.log(msg.from.id, msg.from.username, msg.text);
+
+    if ( msg.chat.id !== process.env.TG_CHANNEL_ID && msg.chat.id !== process.env.TG_GROUP_ID ) {
+        console.log(msg.from.id, msg.from.username, msg.text);
+    }
 
     if ( msg.text === '/start' ) {
         bot.sendMessage(msg.chat.id, 'Здравствуйте, я бот-админ Angel Mind 🥳\n\nНапишите пожалуйста свой nickname, вы получили его на сайте angelmind.ru при покупке курса «Мастерская души»\nИ я вас добавлю в канал 😇')
@@ -71,8 +74,7 @@ bot.on('message', msg => {
                     connection.query(`
                         SELECT
                             p.ID AS 'order_id',
-                            p.po
-                            st_date AS 'purchase_date',
+                            p.post_date AS 'purchase_date',
                             MAX( CASE WHEN pm.meta_key = '_customer_user'       AND p.ID = pm.post_id THEN pm.meta_value END ) AS 'user_id',
                             ( select group_concat( order_item_name ) FROM wp_woocommerce_order_items where order_id = p.ID AND order_item_name LIKE '%Мастерская души%' ) AS 'Items Ordered',
                             ( select group_concat(order_item_id ) FROM wp_woocommerce_order_items where order_id = p.ID AND order_item_name LIKE '%Мастерская души%' ) AS 'item_id'
